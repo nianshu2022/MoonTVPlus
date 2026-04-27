@@ -15,6 +15,7 @@ import {
   normalizePan123Password,
   validatePan123Credentials,
 } from '@/lib/netdisk/pan123.client';
+import { assertPan115CookieHeaderSafe, normalizePan115Cookie, validatePan115Cookie } from '@/lib/netdisk/pan115.client';
 import {
   assertQuarkCookieHeaderSafe,
   normalizeQuarkCookie,
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { action, Quark, Mobile, Baidu, Tianyi, Pan123, UC, provider } = body;
+    const { action, Quark, Mobile, Baidu, Tianyi, Pan123, UC, Pan115, provider } = body;
     const adminConfig = await getConfig();
 
     if (action === 'save') {
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
       const normalizedPan123Password = Pan123?.Password ? normalizePan123Password(Pan123.Password) : '';
       const normalizedUCCookie = UC?.Cookie ? assertUCCookieHeaderSafe(UC.Cookie) : '';
       const normalizedUCToken = UC?.Token ? String(UC.Token).trim() : '';
+      const normalizedPan115Cookie = Pan115?.Cookie ? assertPan115CookieHeaderSafe(Pan115.Cookie) : '';
 
       adminConfig.NetDiskConfig = adminConfig.NetDiskConfig || {};
       adminConfig.NetDiskConfig.Quark = {
@@ -101,6 +103,10 @@ export async function POST(request: NextRequest) {
         Cookie: normalizedUCCookie,
         Token: normalizedUCToken,
         SavePath: UC?.SavePath || '/',
+      };
+      adminConfig.NetDiskConfig.Pan115 = {
+        Enabled: Boolean(Pan115?.Enabled),
+        Cookie: normalizedPan115Cookie,
       };
 
       await db.saveAdminConfig(adminConfig);
@@ -165,6 +171,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: 'UC Cookie 可读',
+        });
+      }
+      if (provider === 'pan115') {
+        if (!Pan115?.Cookie) {
+          return NextResponse.json({ error: '请先填写115 Cookie' }, { status: 400 });
+        }
+        await validatePan115Cookie(normalizePan115Cookie(Pan115.Cookie));
+        return NextResponse.json({
+          success: true,
+          message: '115 Cookie 格式正常',
         });
       }
 

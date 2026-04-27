@@ -3718,6 +3718,8 @@ const NetDiskConfigComponent = ({
   const [ucCookie, setUcCookie] = useState('');
   const [ucToken, setUcToken] = useState('');
   const [ucSavePath, setUcSavePath] = useState('/');
+  const [pan115Enabled, setPan115Enabled] = useState(false);
+  const [pan115Cookie, setPan115Cookie] = useState('');
 
   useEffect(() => {
     const quark = config?.NetDiskConfig?.Quark;
@@ -3739,6 +3741,8 @@ const NetDiskConfigComponent = ({
     setUcCookie(config?.NetDiskConfig?.UC?.Cookie || '');
     setUcToken(config?.NetDiskConfig?.UC?.Token || '');
     setUcSavePath(config?.NetDiskConfig?.UC?.SavePath || '/');
+    setPan115Enabled(config?.NetDiskConfig?.Pan115?.Enabled || false);
+    setPan115Cookie(config?.NetDiskConfig?.Pan115?.Cookie || '');
   }, [config]);
 
   const handleSave = async () => {
@@ -3776,6 +3780,10 @@ const NetDiskConfigComponent = ({
             Cookie: ucCookie,
             Token: ucToken,
             SavePath: ucSavePath,
+          },
+          Pan115: {
+            Enabled: pan115Enabled,
+            Cookie: pan115Cookie,
           },
         }),
       });
@@ -3955,6 +3963,34 @@ const NetDiskConfigComponent = ({
         }
 
         showSuccess(data.message || 'UC Cookie 可读', showAlert);
+      } catch (error) {
+        showError(error instanceof Error ? error.message : '校验失败', showAlert);
+        throw error;
+      }
+    });
+  };
+
+  const handleValidatePan115 = async () => {
+    await withLoading('validatePan115NetDisk', async () => {
+      try {
+        const response = await fetch('/api/admin/netdisk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'validate',
+            provider: 'pan115',
+            Pan115: {
+              Cookie: pan115Cookie,
+            },
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || '校验失败');
+        }
+
+        showSuccess(data.message || '115 Cookie 格式正常', showAlert);
       } catch (error) {
         showError(error instanceof Error ? error.message : '校验失败', showAlert);
         throw error;
@@ -4374,6 +4410,64 @@ const NetDiskConfigComponent = ({
               className={buttonStyles.primary}
             >
               {isLoading('validateUCNetDisk') ? '校验中...' : '校验UC配置'}
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={isLoading('saveNetDisk')}
+              className={buttonStyles.success}
+            >
+              {isLoading('saveNetDisk') ? '保存中...' : '保存配置'}
+            </button>
+          </div>
+        </div>
+      </details>
+
+      <details className='pt-4 border-t border-gray-200 dark:border-gray-700'>
+        <summary className='text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer'>
+          115网盘
+        </summary>
+        <div className='mt-4 space-y-4'>
+          <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700'>
+            <div>
+              <h3 className='text-sm font-medium text-gray-900 dark:text-gray-100'>
+                启用115网盘
+              </h3>
+              <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                开启后，网盘搜索中的115网盘资源会显示“立即播放”按钮
+              </p>
+            </div>
+            <label className='relative inline-flex items-center cursor-pointer'>
+              <input
+                type='checkbox'
+                checked={pan115Enabled}
+                onChange={(e) => setPan115Enabled(e.target.checked)}
+                className='sr-only peer'
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
+            </label>
+          </div>
+
+          <div>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+              Cookie
+            </label>
+            <textarea
+              value={pan115Cookie}
+              onChange={(e) => setPan115Cookie(e.target.value)}
+              disabled={!pan115Enabled}
+              rows={5}
+              placeholder='粘贴115网盘 Cookie'
+              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed'
+            />
+          </div>
+
+          <div className='flex gap-3'>
+            <button
+              onClick={handleValidatePan115}
+              disabled={!pan115Enabled || !pan115Cookie || isLoading('validatePan115NetDisk')}
+              className={buttonStyles.primary}
+            >
+              {isLoading('validatePan115NetDisk') ? '校验中...' : '校验115 Cookie'}
             </button>
             <button
               onClick={handleSave}

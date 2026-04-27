@@ -694,6 +694,10 @@ export function configSelfCheck(adminConfig: AdminConfig): AdminConfig {
         Token: '',
         SavePath: '/',
       },
+      Pan115: {
+        Enabled: false,
+        Cookie: '',
+      },
     };
   }
 
@@ -741,6 +745,13 @@ export function configSelfCheck(adminConfig: AdminConfig): AdminConfig {
       Cookie: '',
       Token: '',
       SavePath: '/',
+    };
+  }
+
+  if (!adminConfig.NetDiskConfig.Pan115) {
+    adminConfig.NetDiskConfig.Pan115 = {
+      Enabled: false,
+      Cookie: '',
     };
   }
 

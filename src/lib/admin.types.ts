@@ -176,6 +176,10 @@ export interface AdminConfig {
       Token?: string;
       SavePath: string;
     };
+    Pan115?: {
+      Enabled: boolean;
+      Cookie: string;
+    };
   };
   AIConfig?: {
     Enabled: boolean; // 是否启用AI问片功能

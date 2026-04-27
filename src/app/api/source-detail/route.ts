@@ -25,6 +25,12 @@ import {
   refreshPan123NetdiskSession,
 } from '@/lib/netdisk/pan123-session-cache';
 import {
+  createPan115NetdiskSession,
+  getPan115NetdiskSession,
+  parsePan115NetdiskId,
+  refreshPan115NetdiskSession,
+} from '@/lib/netdisk/pan115-session-cache';
+import {
   createQuarkNetdiskSession,
   getQuarkNetdiskSession,
   parseQuarkNetdiskId,
@@ -32,6 +38,7 @@ import {
 } from '@/lib/netdisk/quark-session-cache';
 import {
   LEGACY_QUARK_TEMP_SOURCE,
+  NETDISK_115_SOURCE,
   NETDISK_123_SOURCE,
   NETDISK_BAIDU_SOURCE,
   NETDISK_MOBILE_SOURCE,
@@ -623,6 +630,74 @@ export async function GET(request: NextRequest) {
       });
     } catch (error) {
       console.error('[netdisk-123][source-detail] error', error);
+      return NextResponse.json(
+        { error: (error as Error).message },
+        { status: 500 }
+      );
+    }
+  }
+
+  if (sourceCode === NETDISK_115_SOURCE) {
+    try {
+      const config = await getConfig();
+      const pan115Config = config.NetDiskConfig?.Pan115;
+      if (!pan115Config?.Enabled || !pan115Config.Cookie) {
+        throw new Error('115网盘未配置或未启用');
+      }
+
+      let session = refreshPan115NetdiskSession(id) || getPan115NetdiskSession(id);
+      if (!session) {
+        const payload = parsePan115NetdiskId(id);
+        const { listPan115ShareVideos } = await import('@/lib/netdisk/pan115.client');
+        const result = await listPan115ShareVideos(payload.shareUrl, payload.passcode || '');
+        session = createPan115NetdiskSession({
+          title: title || result.title,
+          shareUrl: payload.shareUrl,
+          passcode: payload.passcode,
+          files: result.files,
+        });
+      }
+      if (!session) {
+        throw new Error('115网盘播放信息恢复失败');
+      }
+
+      const pan115Session = session;
+      const { parseVideoFileName } = await import('@/lib/video-parser');
+      const parsedFiles = pan115Session.files
+        .map((file, index) => {
+          const parsed = parseVideoFileName(file.name);
+          return {
+            ...file,
+            originalIndex: index,
+            sortEpisode: parsed.episode || index + 1,
+            isOVA: parsed.isOVA,
+            displayTitle: formatNetdiskEpisodeTitle(parsed, file.name),
+          };
+        })
+        .sort((a, b) => {
+          if (a.isOVA && !b.isOVA) return 1;
+          if (!a.isOVA && b.isOVA) return -1;
+          return a.sortEpisode !== b.sortEpisode
+            ? a.sortEpisode - b.sortEpisode
+            : a.name.localeCompare(b.name, 'zh-Hans-CN', { numeric: true, sensitivity: 'base' });
+        });
+
+      return NextResponse.json({
+        source: NETDISK_115_SOURCE,
+        source_name: '115网盘',
+        id: pan115Session.id,
+        title: title || pan115Session.title,
+        poster: '',
+        year: '',
+        douban_id: 0,
+        desc: `115网盘分享：${pan115Session.shareUrl}`,
+        episodes: parsedFiles.map((file) => (
+          `/api/netdisk/115/play?id=${encodeURIComponent(pan115Session.id)}&episodeIndex=${file.originalIndex}`
+        )),
+        episodes_titles: parsedFiles.map((file) => file.displayTitle),
+        proxyMode: false,
+      });
+    } catch (error) {
       return NextResponse.json(
         { error: (error as Error).message },
         { status: 500 }

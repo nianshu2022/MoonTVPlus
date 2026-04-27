@@ -72,7 +72,7 @@ function HomeClient() {
   const [toast, setToast] = useState<ToastProps | null>(null);
 
   const detectNetdiskLink = (url: string): {
-    provider: 'quark' | 'mobile' | 'baidu' | 'tianyi' | '123' | 'uc';
+    provider: 'quark' | 'mobile' | 'baidu' | 'tianyi' | '123' | 'uc' | '115';
     shareUrl: string;
     passcode?: string;
   } | null => {
@@ -146,6 +146,17 @@ function HomeClient() {
       return { provider: 'mobile', shareUrl: trimmed };
     }
 
+    if (/https:\/\/(?:115|anxia|115cdn)\.com\/s\//i.test(trimmed)) {
+      return {
+        provider: '115',
+        shareUrl: trimmed,
+        passcode: pickPasscode(
+          trimmed.match(/[?&](?:password|pwd|passcode)=([^&]+)/i)?.[1],
+          inlinePasscode(trimmed)
+        ),
+      };
+    }
+
     return null;
   };
 
@@ -168,6 +179,8 @@ function HomeClient() {
                 ? 'netdisk-baidu'
               : netdisk.provider === 'tianyi'
                 ? 'netdisk-tianyi'
+                : netdisk.provider === '115'
+                  ? 'netdisk-115'
                 : netdisk.provider === 'uc'
                   ? 'netdisk-uc'
                 : netdisk.provider === '123'
@@ -860,7 +873,7 @@ function HomeClient() {
                 请输入可直接播放的视频链接。
               </div>
               <div className='text-xs text-gray-500 dark:text-gray-400'>
-                支持夸克、UC、百度、天翼、移动、123 网盘在线播放。
+                支持夸克、UC、百度、天翼、移动、123、115 网盘在线播放。
               </div>
               <input
                 value={directPlayUrl}

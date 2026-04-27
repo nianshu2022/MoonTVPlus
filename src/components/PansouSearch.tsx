@@ -309,10 +309,12 @@ export default function PansouSearch({
           ? '/api/netdisk/mobile/instant-play'
           : cloudType === 'baidu'
             ? '/api/netdisk/baidu/instant-play'
-            : cloudType === 'tianyi'
-              ? '/api/netdisk/tianyi/instant-play'
-              : cloudType === 'uc'
-                ? '/api/netdisk/uc/instant-play'
+              : cloudType === 'tianyi'
+                ? '/api/netdisk/tianyi/instant-play'
+                : cloudType === '115'
+                  ? '/api/netdisk/115/instant-play'
+                : cloudType === 'uc'
+                  ? '/api/netdisk/uc/instant-play'
               : cloudType === '123'
                 ? '/api/netdisk/123/instant-play'
               : '/api/netdisk/quark/instant-play';
@@ -334,7 +336,7 @@ export default function PansouSearch({
       }
 
       router.push(
-        `/play?source=${encodeURIComponent(data.source || (cloudType === 'mobile' ? 'netdisk-mobile' : cloudType === 'baidu' ? 'netdisk-baidu' : cloudType === 'tianyi' ? 'netdisk-tianyi' : cloudType === 'uc' ? 'netdisk-uc' : cloudType === '123' ? 'netdisk-123' : 'netdisk-quark'))}&id=${encodeURIComponent(data.id)}&title=${encodeURIComponent(keyword)}`
+        `/play?source=${encodeURIComponent(data.source || (cloudType === 'mobile' ? 'netdisk-mobile' : cloudType === 'baidu' ? 'netdisk-baidu' : cloudType === 'tianyi' ? 'netdisk-tianyi' : cloudType === '115' ? 'netdisk-115' : cloudType === 'uc' ? 'netdisk-uc' : cloudType === '123' ? 'netdisk-123' : 'netdisk-quark'))}&id=${encodeURIComponent(data.id)}&title=${encodeURIComponent(keyword)}`
       );
     } catch (err: any) {
       setToast({
@@ -618,7 +620,7 @@ export default function PansouSearch({
                             </span>
                           );
                         })()}
-                        {(cloudType === 'quark' || cloudType === 'mobile' || cloudType === 'baidu' || cloudType === 'tianyi' || cloudType === '123' || cloudType === 'uc') && (
+                        {(cloudType === 'quark' || cloudType === 'mobile' || cloudType === 'baidu' || cloudType === 'tianyi' || cloudType === '123' || cloudType === 'uc' || cloudType === '115') && (
                           <>
                             <button
                               onClick={() => handleNetdiskInstantPlay(cloudType, link)}
