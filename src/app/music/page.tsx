@@ -1358,7 +1358,7 @@ export default function MusicPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="music-theme min-h-screen bg-zinc-950 text-white">
       <>
       {resolvingCount > 0 && (
         <div className="fixed top-4 right-4 z-[80] pointer-events-none">
@@ -1447,9 +1447,11 @@ export default function MusicPage() {
                 </svg>
               </button>
             )}
-            <div className="relative group w-full h-full">
+            <div
+              className="relative group w-full h-full rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <svg className="w-4 h-4 text-zinc-500 group-focus-within:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-zinc-500 transition-colors group-focus-within:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -1458,7 +1460,7 @@ export default function MusicPage() {
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                className="w-full h-full bg-black/30 border border-white/10 rounded-lg pl-9 pr-4 text-sm text-white focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/50 font-mono placeholder-zinc-500"
+                className="w-full h-full appearance-none border-0 bg-transparent pl-9 pr-4 text-sm text-white outline-none focus:outline-none focus:ring-0 font-mono placeholder:text-zinc-500"
                 placeholder="搜索歌曲或艺术家..."
               />
             </div>
@@ -2553,7 +2555,7 @@ export default function MusicPage() {
       {confirmModal.isOpen &&
         createPortal(
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            className="music-theme-portal fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
             style={{ zIndex: 99999 }}
             onClick={confirmModal.onCancel}
           >
@@ -2645,6 +2647,100 @@ export default function MusicPage() {
           onClose={() => setShowPiPLyrics(false)}
         />
       )}
+      <style jsx global>{`
+        :root {
+          --music-bg: #f4f7fb;
+          --music-bg-strong: rgba(255, 255, 255, 0.96);
+          --music-surface: rgba(255, 255, 255, 0.88);
+          --music-surface-soft: rgba(241, 245, 249, 0.92);
+          --music-overlay: rgba(15, 23, 42, 0.45);
+          --music-glass: rgba(15, 23, 42, 0.06);
+          --music-glass-strong: rgba(15, 23, 42, 0.1);
+          --music-border: rgba(148, 163, 184, 0.28);
+          --music-text: #0f172a;
+          --music-text-soft: #475569;
+          --music-text-muted: #64748b;
+        }
+
+        .dark {
+          --music-bg: #09090b;
+          --music-bg-strong: rgba(9, 9, 11, 0.95);
+          --music-surface: rgba(24, 24, 27, 0.9);
+          --music-surface-soft: rgba(39, 39, 42, 0.88);
+          --music-overlay: rgba(0, 0, 0, 0.72);
+          --music-glass: rgba(255, 255, 255, 0.05);
+          --music-glass-strong: rgba(255, 255, 255, 0.1);
+          --music-border: rgba(255, 255, 255, 0.1);
+          --music-text: #f8fafc;
+          --music-text-soft: #cbd5e1;
+          --music-text-muted: #94a3b8;
+        }
+
+        .music-theme {
+          background: linear-gradient(180deg, var(--music-bg) 0%, color-mix(in srgb, var(--music-bg) 82%, #22c55e 18%) 100%);
+          color: var(--music-text);
+        }
+
+        .music-theme :is([class*='bg-zinc-950'], [class*='bg-zinc-900']),
+        .music-theme-portal :is([class*='bg-zinc-950'], [class*='bg-zinc-900']) {
+          background-color: var(--music-bg-strong) !important;
+        }
+
+        .music-theme [class*='bg-zinc-800'],
+        .music-theme-portal [class*='bg-zinc-800'] {
+          background-color: var(--music-surface-soft) !important;
+        }
+
+        .music-theme :is([class*='bg-white/5'], [class*='bg-white/6'], [class*='bg-white/8'], [class*='bg-white/10'], [class*='bg-white/12']),
+        .music-theme-portal :is([class*='bg-white/5'], [class*='bg-white/6'], [class*='bg-white/8'], [class*='bg-white/10'], [class*='bg-white/12']) {
+          background-color: var(--music-glass) !important;
+        }
+
+        .music-theme [class*='bg-white/20'],
+        .music-theme-portal [class*='bg-white/20'] {
+          background-color: var(--music-glass-strong) !important;
+        }
+
+        .music-theme :is([class*='bg-black/90'], [class*='bg-black/50'], [class*='bg-black/30']),
+        .music-theme-portal :is([class*='bg-black/90'], [class*='bg-black/50'], [class*='bg-black/30']) {
+          background-color: var(--music-overlay) !important;
+        }
+
+        .music-theme :is([class*='border-white/'], [class*='border-zinc-']),
+        .music-theme-portal :is([class*='border-white/'], [class*='border-zinc-']) {
+          border-color: var(--music-border) !important;
+        }
+
+        .music-theme :is([class*='text-white'], [class*='text-zinc-200']),
+        .music-theme-portal :is([class*='text-white'], [class*='text-zinc-200']) {
+          color: var(--music-text) !important;
+        }
+
+        .music-theme :is([class*='text-zinc-300'], [class*='text-zinc-400']),
+        .music-theme-portal :is([class*='text-zinc-300'], [class*='text-zinc-400']) {
+          color: var(--music-text-soft) !important;
+        }
+
+        .music-theme :is([class*='text-zinc-500'], [class*='text-zinc-600']),
+        .music-theme-portal :is([class*='text-zinc-500'], [class*='text-zinc-600']) {
+          color: var(--music-text-muted) !important;
+        }
+
+        .music-theme :is([class*='from-zinc-800'], [class*='from-zinc-900']) {
+          --tw-gradient-from: var(--music-surface-soft) var(--tw-gradient-from-position) !important;
+          --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position) !important;
+          --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+        }
+
+        .music-theme :is([class*='to-zinc-900'], [class*='to-zinc-800']) {
+          --tw-gradient-to: var(--music-bg-strong) var(--tw-gradient-to-position) !important;
+        }
+
+        .music-theme input::placeholder,
+        .music-theme textarea::placeholder {
+          color: var(--music-text-muted) !important;
+        }
+      `}</style>
       </>
     </div>
   );
