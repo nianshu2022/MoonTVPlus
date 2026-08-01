@@ -3,6 +3,9 @@ import { validateProxyUrlServerSide } from '@/lib/server/ssrf';
 
 export const runtime = 'nodejs';
 
+const isCloudflareRuntime =
+  process.env.CF_PAGES === '1' || process.env.BUILD_TARGET === 'cloudflare';
+
 // 视频代理接口，支持Range请求
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -16,6 +19,15 @@ export async function GET(request: Request) {
   const isSafeUrl = await validateProxyUrlServerSide(videoUrl);
   if (!isSafeUrl) {
     return NextResponse.json({ error: 'Proxy request to local or invalid network is forbidden' }, { status: 403 });
+  }
+
+  if (isCloudflareRuntime) {
+    return NextResponse.redirect(videoUrl, {
+      status: 302,
+      headers: {
+        'Cache-Control': 'public, max-age=31536000, s-maxage=31536000',
+      },
+    });
   }
 
   try {
