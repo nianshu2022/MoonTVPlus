@@ -1046,10 +1046,6 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(
                   onLoadingComplete={() => {
                     setIsLoading(true);
                   }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowImageViewer(true);
-                  }}
                   onError={(e) => {
                     const img = e.currentTarget as HTMLImageElement;
                     const doubanFallbackPoster =
@@ -1094,8 +1090,7 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(
                       WebkitUserSelect: 'none',
                       userSelect: 'none',
                       WebkitTouchCallout: 'none',
-                      pointerEvents: 'auto', // 改为auto以响应点击事件
-                      cursor: 'pointer', // 添加指针样式
+                      pointerEvents: 'none', // 海报点击交给卡片外层处理，确保点击播放
                     } as React.CSSProperties
                   }
                   onContextMenu={(e) => {
@@ -1162,8 +1157,7 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(
             ) : (
               config.showPlayButton && (
                 <div
-                  data-button='true'
-                  className='absolute inset-0 flex items-center justify-center opacity-0 transition-all duration-300 ease-in-out delay-75 group-hover:opacity-100 group-hover:scale-100'
+                  className='pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-all duration-300 ease-in-out delay-75 group-hover:opacity-100 group-hover:scale-100'
                   style={
                     {
                       WebkitUserSelect: 'none',
@@ -2019,7 +2013,7 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(
                   </span>
                   {/* 自定义 tooltip */}
                   <div
-                    className='absolute bottom-full left-1/2 z-10 mb-2 w-max max-w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-md bg-gray-800 px-3 py-1 text-center text-xs text-white shadow-lg opacity-0 invisible peer-hover:opacity-100 peer-hover:visible transition-all duration-200 ease-out delay-100 whitespace-normal break-words pointer-events-none'
+                    className='absolute bottom-full left-1/2 z-[70] mb-2 w-max max-w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-md bg-gray-800 px-3 py-1 text-center text-xs text-white shadow-lg opacity-0 invisible peer-hover:opacity-100 peer-hover:visible transition-all duration-200 ease-out delay-100 whitespace-normal break-words pointer-events-none'
                     style={
                       {
                         WebkitUserSelect: 'none',
